@@ -1,9 +1,10 @@
 import { JustaName } from '@justaname.id/sdk';
 import { Injectable, OnModuleInit } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { Subdomain } from './interfaces/subdomain.interface';
 
 @Injectable()
-export class ClaimService implements OnModuleInit {
+export class JustaNameService implements OnModuleInit {
     justaName: JustaName;
     chainId: number;
     domain: string;
