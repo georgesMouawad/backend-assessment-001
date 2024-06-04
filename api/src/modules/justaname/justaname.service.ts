@@ -1,7 +1,7 @@
 import { JustaName } from '@justaname.id/sdk';
 import { Injectable, OnModuleInit } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { Subdomain } from './interfaces/subdomain.interface';
+import { Subdomain, RequestChallenge } from './interfaces';
 
 @Injectable()
 export class JustaNameService implements OnModuleInit {
@@ -18,17 +18,18 @@ export class JustaNameService implements OnModuleInit {
         this.ensDomain = this.configService.get('JUSTANAME_ENS_DOMAIN');
     }
 
-    async onModuleInit(): Promise<void> {
-        await this.init();
+    onModuleInit() {
+        this.init();
     }
 
-    async init() {
-        this.justaName = await JustaName.init({
+    init() {
+        this.justaName = JustaName.init({
             apiKey: this.configService.get('JUSTANAME_API_KEY'),
         });
     }
 
     async addSubdomain(request: Subdomain): Promise<any> {
+
         if (!request.username) {
             return {
                 message: 'Username is required',
@@ -43,7 +44,7 @@ export class JustaNameService implements OnModuleInit {
             };
 
             if (request.isAdmin !== undefined && request.isAdmin) {
-                params.textRecords = [{ key: 'admin', value: ["${request.username}.${this.ensDomain}"] }];
+                params.textRecords = [{ key: 'admin', value: [`${request.username}.${this.ensDomain}`] }];
             }
 
             const addResponse = await this.justaName.subnames.addSubname(params, {
@@ -60,4 +61,7 @@ export class JustaNameService implements OnModuleInit {
             };
         }
     }
+
+
+
 }
