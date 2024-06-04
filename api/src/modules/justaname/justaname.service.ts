@@ -1,4 +1,4 @@
-import { JustaName } from '@justaname.id/sdk';
+import { ChainId, JustaName } from '@justaname.id/sdk';
 import { Injectable, OnModuleInit } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Subdomain, RequestChallenge } from './interfaces';
@@ -17,13 +17,13 @@ export class JustaNameService implements OnModuleInit {
         this.origin = this.configService.get('JUSTANAME_ORIGIN');
         this.ensDomain = this.configService.get('JUSTANAME_ENS_DOMAIN');
     }
-
-    onModuleInit() {
-        this.init();
+    
+    async onModuleInit() {
+        await this.init();
     }
 
-    init() {
-        this.justaName = JustaName.init({
+    async init() {
+        this.justaName = await JustaName.init({
             apiKey: this.configService.get('JUSTANAME_API_KEY'),
         });
     }
@@ -37,6 +37,7 @@ export class JustaNameService implements OnModuleInit {
         }
 
         try {
+
             const params: any = {
                 username: request.username,
                 ensDomain: this.ensDomain,
@@ -58,6 +59,33 @@ export class JustaNameService implements OnModuleInit {
         } catch (error) {
             return {
                 error: error.message
+            };
+        }
+    }
+
+    async requestChallenge(request: RequestChallenge): Promise<any> {
+
+        if (!request.address) {
+            return {
+                message: 'Address is required',
+            };
+        }
+
+        try {
+
+            const challengeResponse = await this.justaName.siwe.requestChallenge({
+                chainId: this.chainId as ChainId,
+                origin: this.origin,
+                address: request.address,
+                domain: this.domain,
+                ttl: 1800000,
+            });
+
+            return challengeResponse;
+
+        } catch (error) {
+            return {
+                error: error.message,
             };
         }
     }
