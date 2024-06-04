@@ -3,4 +3,5 @@ export interface Subdomain {
     address: string;
     signature: string;
     message:string;
+    isAdmin?:boolean;
 }

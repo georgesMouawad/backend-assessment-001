@@ -1,6 +1,6 @@
 import { Body, Controller, Get, Post, Res } from '@nestjs/common';
 import { AppService } from './app.service';
-import { ClaimService } from './services/claim/claim.service';
+import { ClaimService } from './services/justaname/justaname.service';
 import { Subdomain } from './interfaces/subdomain.interface';
 import { Response } from 'express';
 

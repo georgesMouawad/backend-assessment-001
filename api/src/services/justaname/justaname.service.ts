@@ -3,7 +3,6 @@ import { Injectable, OnModuleInit } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Subdomain } from 'src/interfaces/subdomain.interface';
 
-
 @Injectable()
 export class ClaimService implements OnModuleInit {
     justaName: JustaName;
@@ -33,32 +32,34 @@ export class ClaimService implements OnModuleInit {
         if (!request.username) {
             return {
                 message: 'Username is required',
-            }
+            };
         }
 
         try {
-
-            const addResponse = await this.justaName.subnames.addSubname({
+            const params: any = {
                 username: request.username,
                 ensDomain: this.ensDomain,
                 chainId: this.chainId,
-            }, {
+            };
+
+            if (request.isAdmin) {
+                params.textRecords = {
+                    admin: `["${request.username}.${this.ensDomain}"]`
+                };
+            }
+
+            const addResponse = await this.justaName.subnames.addSubname(params, {
                 xSignature: request.signature,
                 xAddress: request.address,
                 xMessage: request.message,
-            })
+            });
 
             return addResponse;
 
         } catch (error) {
-
             return {
                 error: error.message
             };
-
         }
     }
-
-
-
 }
