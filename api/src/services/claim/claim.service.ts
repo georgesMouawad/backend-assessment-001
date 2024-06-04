@@ -6,7 +6,7 @@ import { Subdomain } from 'src/interfaces/subdomain.interface';
 
 @Injectable()
 export class ClaimService implements OnModuleInit {
-    justAName: JustaName;
+    justaName: JustaName;
     chainId: number;
     domain: string;
     origin: string;
@@ -24,7 +24,7 @@ export class ClaimService implements OnModuleInit {
     }
 
     async init() {
-        this.justAName = await JustaName.init({
+        this.justaName = await JustaName.init({
             apiKey: this.configService.get('JUSTANAME_API_KEY'),
         });
     }
@@ -38,7 +38,7 @@ export class ClaimService implements OnModuleInit {
 
         try {
 
-            const addResponse = await this.justAName.subnames.addSubname({
+            const addResponse = await this.justaName.subnames.addSubname({
                 username: request.username,
                 ensDomain: this.ensDomain,
                 chainId: this.chainId,
