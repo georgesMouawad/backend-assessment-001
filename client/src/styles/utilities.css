@@ -98,6 +98,14 @@ button {
     align-items: center;
 }
 
+.gap-s {
+    gap: 4px;
+}
+
+.gap-m {
+    gap: 12px;
+}
+
 .box-shadow {
     box-shadow: 0 20px 20px 0 rgba(0, 0, 0, 0.05);
 }

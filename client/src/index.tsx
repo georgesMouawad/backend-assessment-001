@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom/client';
 import './index.css';
 import App from './App';
 import { BrowserRouter } from 'react-router-dom';
+import { JustaNameProvider } from '@justaname.id/react';
 // import { JustaNameProvider } from '@justaname.id/react';
 
 // require('dotenv').config();
@@ -14,9 +15,9 @@ const root = ReactDOM.createRoot(document.getElementById('root') as HTMLElement)
 root.render(
     <React.StrictMode>
         <BrowserRouter>
-            {/* <JustaNameProvider backendUrl={process.env.REACT_APP_API_URL} chainId={validChainId}> */}
+            <JustaNameProvider backendUrl={'http://localhost:3001'} chainId={11155111}>
                 <App />
-            {/* </JustaNameProvider> */}
+            </JustaNameProvider>
         </BrowserRouter>
     </React.StrictMode>
 );
