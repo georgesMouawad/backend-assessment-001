@@ -45,7 +45,7 @@ export class JustaNameService implements OnModuleInit {
             };
 
             if (request.isAdmin !== undefined && request.isAdmin) {
-                params.textRecords = [{ key: 'admin', value: [`${request.username}.${this.ensDomain}`] }];
+                params.text = [{ key: 'admin', value: JSON.stringify([`${request.username}.${this.ensDomain}`]) }];
             }
 
             const addResponse = await this.justaName.subnames.addSubname(params, {
