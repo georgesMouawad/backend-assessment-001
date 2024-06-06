@@ -21,37 +21,56 @@ export const SiweProvider = ({ children }: { children: React.ReactNode }) => {
         }
     }, [isAuthenticated, navigate]);
 
-    const signIn = async () => {
+    const getSiweNonce = async () => {
         try {
             const nonceResponse = await sendRequest(requestMethods.GET, '/auth/nonce');
+            if (nonceResponse.status !== 200) throw new Error();
+            return nonceResponse.data;
+        } catch (error) {
+            console.log('Error getting nonce', error);
+        }
+    };
 
-            if (nonceResponse.status !== 200) throw new Error('Error getting nonce');
+    const createSiweMessage = async (statement: string) => {
 
-            const { nonce } = nonceResponse.data;
+        const { nonce } = await getSiweNonce();
 
-            const message = new SiweMessage({
-                domain: 'localhost:5173',
-                address,
-                statement: 'Sign in with Ethereum',
-                uri: 'http://localhost:5173',
-                version: '1',
-                chainId: import.meta.env.VITE_APP_CHAIN_ID as number,
-                nonce,
-            });
+        const message = new SiweMessage({
+            domain: 'localhost:5173',
+            address,
+            statement,
+            uri: 'http://localhost:5173',
+            version: '1',
+            chainId: import.meta.env.VITE_APP_CHAIN_ID as number,
+            nonce,
+        });
 
-            const preparedMessage = message.prepareMessage();
+        return message.prepareMessage();
+    };
 
-            const signature = await signMessageAsync({ message: preparedMessage });
-
+    const authenticate = async (message: string, signature: string) => {
+        try {
             const verifyResponse = await sendRequest(requestMethods.POST, '/auth/authenticate', {
-                message: preparedMessage,
+                message,
                 signature,
             });
 
             if (verifyResponse.status !== 201) throw new Error();
-            console.log('Here');
 
             setIsAuthenticated(verifyResponse.data.authenticated);
+        } catch (error) {
+            console.log('Error Authenticating', error);
+        }
+    };
+
+    const signIn = async () => {
+        try {
+            
+            const statement = 'Sign in with Ethereum';
+            const message = await createSiweMessage(statement);
+            const signature = await signMessageAsync({ message });
+
+            await authenticate(message, signature);
         } catch (error) {
             console.error('Error signing in with Ethereum:', error);
         }
