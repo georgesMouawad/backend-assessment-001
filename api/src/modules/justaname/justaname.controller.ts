@@ -24,7 +24,7 @@ export class JustaNameController {
         @Res() response: Response,
     ): Promise<any> {
         const revokeSubdomain = await this.justaNameService.revokeSubdomain(request)
-        response.status(revokeSubdomain.error ? 500 : 200)
+        response.status(revokeSubdomain.error ? 500 : 200).send(revokeSubdomain)
     }
 
     @Get('/requestchallenge')
