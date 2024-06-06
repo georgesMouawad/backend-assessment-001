@@ -1,0 +1,36 @@
+h1 {
+    font-size: 24px;
+    font-weight: 400;
+}
+
+.claim-input {
+    height: 36px;
+    width: 40%;
+    border-top-left-radius: 32px;
+    border-bottom-left-radius: 32px;
+    border: 1px solid #ccc;
+    padding: 0 16px;
+}
+
+.claim-btn {
+    height: 36px;
+    padding: 0 24px;
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+    border-top-right-radius: 32px;
+    border-bottom-right-radius: 32px;
+    background-color: #007bff;
+    color: white;
+}
+
+.newdomain-info {
+    margin-top: 12px;
+}
+
+.valid {
+    color: green;
+}
+
+.error {
+    color: red;
+}
