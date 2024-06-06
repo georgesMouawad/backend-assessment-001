@@ -1,26 +1,95 @@
-import { useState } from 'react';
-import { useAccount } from 'wagmi';
+import { useEffect, useState } from 'react';
+import { useAccount, useSignMessage } from 'wagmi';
 import { useDebounce } from '@uidotdev/usehooks';
 import { ConnectButton } from '@rainbow-me/rainbowkit';
 import { useAccountSubnames, useAddSubname, useIsSubnameAvailable, useRevokeSubname } from '@justaname.id/react';
+import { AddSubnameRequest } from '../../interfaces/AddSubnameRequest';
+import { requestMethods, sendRequest } from '../../core/tools/apiRequest';
 
 import './index.css';
+
+const ensDomain = import.meta.env.VITE_APP_ENS_DOMAIN as string;
 
 const Home = () => {
     const [username, setUsername] = useState<string>('');
     const [isAdmin, setIsAdmin] = useState<boolean>(false);
-    const ensDomain = import.meta.env.VITE_APP_ENS_DOMAIN as string;
+    const [signature, setSignature] = useState<string>('');
+    const [message, setMessage] = useState<string>('');
+
+
     const { address } = useAccount();
-    const { subnames } = useAccountSubnames();
+    const { data: signMessageData, signMessage } = useSignMessage();
+
+    const { subnames, refetchSubnames } = useAccountSubnames();
     const { revokeSubname } = useRevokeSubname();
-    const { addSubname } = useAddSubname();
+    const { addSubname } = useAddSubname<AddSubnameRequest>();
     const debouncedUsername = useDebounce(username, 500);
     const { isAvailable, isLoading } = useIsSubnameAvailable({
         username: debouncedUsername,
         ensDomain,
     });
 
+
+    useEffect(() => {
+        if (signMessageData) {
+            setSignature(signMessageData);
+        }
+    }, [signMessageData]);
+
     console.log(subnames);
+
+    // const createSiweMessage = (address: string, statement: string) => {
+    //     const siweMessage = new SiweMessage({
+    //         domain: 'localhost:5173',
+    //         address,
+    //         statement,
+    //         uri: 'http://localhost:5173',
+    //         version: '1',
+    //         chainId: 11155111,
+    //     });
+
+    //     return siweMessage.prepareMessage();
+    // };
+
+    const handleRevoke = async (username: string) => {
+        await revokeSubname({ username });
+        await refetchSubnames();
+    };
+
+    const handleAdminSubname = async () => {
+        if (!isAdmin || !address) return;
+        try {
+            const challengeResponse = await sendRequest(
+                requestMethods.GET,
+                `/justaname/requestchallenge?address=${address}`
+            );
+            console.log(challengeResponse.data.challenge);
+            const statement = challengeResponse.data.challenge;
+            signMessage({ message: statement });
+            setMessage(statement);
+        } catch (error) {
+            console.log(error);
+        }
+    };
+
+    const handleAdminClaim = async () => {
+        if (!address || !signature || !message) return;
+
+        try {
+            const response = await sendRequest(requestMethods.POST, '/justaname/subdomain', {
+                username,
+                address,
+                signature,
+                message,
+                isAdmin,
+            });
+            console.log(response.data);
+            setUsername('');
+            setIsAdmin(false);
+        } catch (error) {
+            console.log('Error Claiming Subdomain: ', error);
+        }
+    };
 
     return (
         <div className="full">
@@ -32,7 +101,7 @@ const Home = () => {
                             <span
                                 key={subname.id}
                                 className="subname-item"
-                                onClick={() => revokeSubname({ username: subname.username })}
+                                onClick={() => handleRevoke(subname.username)}
                             >
                                 {subname.subname}
                             </span>
@@ -60,7 +129,11 @@ const Home = () => {
                                 />
                                 <button
                                     className="claim-btn button bold size-l flex center"
-                                    onClick={() => addSubname({ username })}
+                                    onClick={() => {
+                                        console.log('Sending add sub', username, isAdmin);
+                                        // addSubname({ username, isAdmin });
+                                        signature ? handleAdminClaim() : handleAdminSubname();
+                                    }}
                                     disabled={!isAvailable || !address || !debouncedUsername}
                                 >
                                     Claim
