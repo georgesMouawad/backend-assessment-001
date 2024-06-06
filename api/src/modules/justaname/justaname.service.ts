@@ -55,9 +55,9 @@ export class JustaNameService implements OnModuleInit {
                 console.log('textRecords', params.text)
             }
 
-            // console.log('xSig', request.signature);
-            // console.log('xAdd', request.address);
-            // console.log('xMes', request.message);
+            console.log('xSig', request.signature);
+            console.log('xAdd', request.address);
+            console.log('xMes', request.message);
             console.log('END')
 
             const addResponse = await this.justaName.subnames.addSubname(params, {
@@ -65,6 +65,24 @@ export class JustaNameService implements OnModuleInit {
                 xAddress: request.address,
                 xMessage: request.message,
             });
+
+            // if (request.isAdmin !== undefined && request.isAdmin) {
+            //     const rootDomainSubname = '';
+            //     const rootDomain = await this.justaName.subnames.getBySubname({ subname: rootDomainSubname, chainId: this.chainId as ChainId })
+            //     console.log('rootDomain', rootDomain)
+            //     await this.justaName.subnames.updateSubname({
+            //         addresses: rootDomain.data.addresses,
+            //         chainId: this.chainId,
+            //         contentHash: rootDomain.data.contentHash,
+            //         ensDomain: this.ensDomain,
+            //         username: rootDomain.username,
+            //         text: [...rootDomain.data.textRecords, { key: 'admin', value: JSON.stringify([`${request.username}.${this.ensDomain}`]) }]
+            //     }, {
+            //         xSignature: request.signature,
+            //         xAddress: request.address,
+            //         xMessage: request.message
+            //     })
+            // }
 
             return addResponse;
 
