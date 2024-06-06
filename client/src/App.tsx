@@ -9,6 +9,9 @@ import Home from './pages/Home/Home';
 import './App.css';
 import './styles/utilities.css';
 import '@rainbow-me/rainbowkit/styles.css';
+import { SiweProvider } from './core/data/SiweProvider';
+import { Route, Routes } from 'react-router-dom';
+import Admin from './pages/Admin/Admin';
 
 const queryClient = new QueryClient();
 
@@ -34,7 +37,12 @@ function App() {
                         chainId={import.meta.env.VITE_APP_CHAIN_ID}
                         routes={routes}
                     >
-                        <Home />
+                        <SiweProvider>
+                            <Routes>
+                                <Route path="/" element={<Home />} />
+                                <Route path="/admin" element={<Admin />} />
+                            </Routes>
+                        </SiweProvider>
                     </JustaNameProvider>
                 </RainbowKitProvider>
             </QueryClientProvider>

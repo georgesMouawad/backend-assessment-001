@@ -39,7 +39,7 @@ export const SiweProvider = ({ children }: { children: React.ReactNode }) => {
                 signature,
             });
 
-            if(verifyResponse.status !== 200) throw new Error('Error verifying the message')
+            // if(verifyResponse.status !== 200) throw new Error()
 
             console.log('Verfication Auth', verifyResponse);
 
