@@ -5,7 +5,7 @@ import { requestMethods, sendRequest } from '../../core/tools/apiRequest';
 
 const ensDomain = import.meta.env.VITE_APP_ENS_DOMAIN as string;
 
-import './index.css'
+import './index.css';
 
 const SubnameClaim = () => {
     const [username, setUsername] = useState<string>('');
@@ -15,7 +15,7 @@ const SubnameClaim = () => {
     const { getSignature } = useSubnameSignature();
     const { refetchSubnames } = useAccountSubnames();
 
-    const debouncedUsername = useDebounce(username, 500);
+    const debouncedUsername = useDebounce(username, 750);
     const { isAvailable, isLoading } = useIsSubnameAvailable({
         username: debouncedUsername,
         ensDomain,
@@ -29,23 +29,16 @@ const SubnameClaim = () => {
     };
 
     const handleAdminClaim = async () => {
-        console.log('Here Admin Claim');
-
         const { signature, message, address } = await getSignature();
 
-        console.log('Signature:', signature);
-        console.log('Message:', message);
-        console.log('Address:', address);
-
         try {
-            const response = await sendRequest(requestMethods.POST, '/justaname/subdomain', {
+            await sendRequest(requestMethods.POST, '/justaname/subdomain', {
                 username,
                 address,
                 signature,
                 message,
                 isAdmin,
             });
-            console.log(response.data);
         } catch (error) {
             console.log('Error Claiming Subdomain: ', error);
         }
@@ -54,7 +47,7 @@ const SubnameClaim = () => {
     return (
         <>
             <div className="full-width flex column center gap-m">
-                <h1>Claim Your ENS Subname</h1>
+                <h1>{`Claim Subnames for ${ensDomain}`}</h1>
                 <div className="full-width flex row center">
                     <input
                         type="text"
@@ -77,9 +70,13 @@ const SubnameClaim = () => {
                 </label>
             </div>
             <div className="newdomain-info">
-                {isLoading && <p>Checking availability...</p>}
-                {isAvailable && debouncedUsername && <p className="valid">Subname available</p>}
-                {!isAvailable && debouncedUsername && <p className="error">Subname not available</p>}
+                {isLoading ? (
+                    <p>Checking availability...</p>
+                ) : isAvailable && debouncedUsername ? (
+                    <p className="valid">Subname available</p>
+                ) : (
+                    !isAvailable && debouncedUsername && <p className="error">Subname not available</p>
+                )}
             </div>
         </>
     );

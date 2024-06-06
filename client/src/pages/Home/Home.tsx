@@ -9,7 +9,6 @@ const Home = () => {
     const { address } = useAccount();
     return (
         <div className="full">
-            {address && <SubnamesClaimed />}
             <div className="full flex column center">
                 {!address ? (
                     <>
@@ -20,6 +19,7 @@ const Home = () => {
                     <SubnameClaim />
                 )}
             </div>
+            {address && <SubnamesClaimed />}
         </div>
     );
 };

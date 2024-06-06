@@ -1,6 +1,9 @@
 .claimed {
     align-self: flex-start;
     margin: 16px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
 }
 
 .claimed>h3 {
@@ -15,8 +18,8 @@
 }
 
 .subname-item {
+    color: #111;
     background-color: #f1f1f1;
-    padding: 4px 8px;
-    border-radius: 8px;
+    padding: 8px 12px;
     cursor: pointer;
 }
