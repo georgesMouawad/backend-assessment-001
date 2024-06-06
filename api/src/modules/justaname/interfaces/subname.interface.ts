@@ -1,4 +1,4 @@
-export interface Subdomain {
+export interface Subname {
     username: string;
     address: string;
     signature: string;

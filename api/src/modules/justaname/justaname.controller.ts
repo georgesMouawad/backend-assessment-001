@@ -1,30 +1,30 @@
 import { Controller, Post, Body, Res, Get, Query } from '@nestjs/common';
 import { JustaNameService } from './justaname.service';
 import { Response } from 'express';
-import { Subdomain } from './interfaces/subdomain.interface';
+import { Subname } from './interfaces/subname.interface';
 import { RequestChallenge } from './interfaces';
 
 @Controller('/justaname')
 export class JustaNameController {
     constructor(private readonly justaNameService: JustaNameService) { }
 
-    @Post('/subdomain')
-    async addSubdomain(
-        @Body() request: Subdomain,
+    @Post('/subname')
+    async addSubname(
+        @Body() request: Subname,
         @Res() response: Response,
     ): Promise<any> {
         console.log('controller', request)
-        const subdomain = await this.justaNameService.addSubdomain(request);
-        response.status(subdomain.error ? 500 : 201).send(subdomain);
+        const subname = await this.justaNameService.addSubname(request);
+        response.status(subname.error ? 500 : 201).send(subname);
     }
 
-    @Post('/subdomain/revoke')
-    async RevokeSubdomain(
-        @Body() request: Subdomain,
+    @Post('/subname/revoke')
+    async RevokeSubname(
+        @Body() request: Subname,
         @Res() response: Response,
     ): Promise<any> {
-        const revokeSubdomain = await this.justaNameService.revokeSubdomain(request)
-        response.status(revokeSubdomain.error ? 500 : 200).send(revokeSubdomain)
+        const revokeSubname = await this.justaNameService.revokeSubname(request)
+        response.status(revokeSubname.error ? 500 : 200).send(revokeSubname)
     }
 
     @Get('/requestchallenge')

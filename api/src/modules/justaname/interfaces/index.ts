@@ -1,2 +1,2 @@
-export * from './subdomain.interface';
+export * from './subname.interface';
 export * from './requestChallenge.interface';
