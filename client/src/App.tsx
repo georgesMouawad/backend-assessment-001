@@ -21,7 +21,7 @@ function App() {
 
     const routes = {
         addSubnameRoute: '/justaname/subdomain',
-        revokeSubnameRoute: '/justaname/revoke',
+        revokeSubnameRoute: '/justaname/subdomain/revoke',
         requestChallengeRoute: '/justaname/requestchallenge',
     };
 

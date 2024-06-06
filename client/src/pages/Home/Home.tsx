@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useAccount } from 'wagmi';
 import { useDebounce } from '@uidotdev/usehooks';
 import { ConnectButton } from '@rainbow-me/rainbowkit';
-import { useAccountSubnames, useAddSubname, useIsSubnameAvailable } from '@justaname.id/react';
+import { useAccountSubnames, useAddSubname, useIsSubnameAvailable, useRevokeSubname } from '@justaname.id/react';
 
 import './index.css';
 
@@ -12,6 +12,7 @@ const Home = () => {
     const ensDomain = import.meta.env.VITE_APP_ENS_DOMAIN as string;
     const { address } = useAccount();
     const { subnames } = useAccountSubnames();
+    const { revokeSubname } = useRevokeSubname();
     const { addSubname } = useAddSubname();
     const debouncedUsername = useDebounce(username, 500);
     const { isAvailable, isLoading } = useIsSubnameAvailable({
@@ -23,14 +24,20 @@ const Home = () => {
 
     return (
         <div className="full">
-            <div className='claimed'>
-                <h3>Claimed Domains:</h3>
+            <div className="claimed">
+                <h3>Claimed Domains under {ensDomain}</h3>
                 <div className="subnames-container">
-                    {subnames.map((subname) => (
-                        <span key={subname.id} className="subname-item">
-                            {subname.subname}
-                        </span>
-                    ))}
+                    {subnames.map((subname) =>
+                        subname.username ? (
+                            <span
+                                key={subname.id}
+                                className="subname-item"
+                                onClick={() => revokeSubname({ username: subname.username })}
+                            >
+                                {subname.subname}
+                            </span>
+                        ) : null
+                    )}
                 </div>
             </div>
             <div className="full flex column center">
