@@ -30,22 +30,22 @@ const routes = {
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
     <React.StrictMode>
-        <WagmiProvider config={config}>
-            <QueryClientProvider client={queryClient}>
-                <RainbowKitProvider>
-                    <JustaNameProvider
-                        backendUrl={import.meta.env.VITE_APP_API_URL}
-                        chainId={import.meta.env.VITE_APP_CHAIN_ID}
-                        routes={routes}
-                    >
-                        <SiweProvider>
-                            <BrowserRouter>
+        <BrowserRouter>
+            <WagmiProvider config={config}>
+                <QueryClientProvider client={queryClient}>
+                    <RainbowKitProvider>
+                        <JustaNameProvider
+                            backendUrl={import.meta.env.VITE_APP_API_URL}
+                            chainId={import.meta.env.VITE_APP_CHAIN_ID}
+                            routes={routes}
+                        >
+                            <SiweProvider>
                                 <App />
-                            </BrowserRouter>
-                        </SiweProvider>
-                    </JustaNameProvider>
-                </RainbowKitProvider>
-            </QueryClientProvider>
-        </WagmiProvider>
+                            </SiweProvider>
+                        </JustaNameProvider>
+                    </RainbowKitProvider>
+                </QueryClientProvider>
+            </WagmiProvider>
+        </BrowserRouter>
     </React.StrictMode>
 );

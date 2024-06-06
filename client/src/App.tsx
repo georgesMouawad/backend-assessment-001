@@ -14,7 +14,7 @@ function App() {
         <>
             <GuestRoutes>
                 <Routes>
-                    <Route path="/" element={<Auth />} />
+                    <Route path="/auth" element={<Auth />} />
                 </Routes>
             </GuestRoutes>
             <AuthenticatedRoutes>

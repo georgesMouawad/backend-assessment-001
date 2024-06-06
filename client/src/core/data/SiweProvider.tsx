@@ -1,25 +1,34 @@
-import { createContext, useContext, useState } from 'react';
+import { createContext, useContext, useEffect, useState } from 'react';
 import { SiweMessage } from 'siwe';
 import { useAccount, useSignMessage } from 'wagmi';
 import { requestMethods, sendRequest } from '../tools/apiRequest';
+import { useNavigate } from 'react-router-dom';
 
 const SiweContext = createContext<{ signIn: () => Promise<void>; isAuthenticated: boolean } | null>(null);
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useSiwe = () => useContext(SiweContext);
 
 export const SiweProvider = ({ children }: { children: React.ReactNode }) => {
     const { address } = useAccount();
     const { signMessageAsync } = useSignMessage();
     const [isAuthenticated, setIsAuthenticated] = useState(false);
+    const navigate = useNavigate();
+
+    useEffect(() => {
+        if (isAuthenticated) {
+            navigate('/');
+        }
+    }, [isAuthenticated, navigate]);
 
     const signIn = async () => {
         try {
             const nonceResponse = await sendRequest(requestMethods.GET, '/auth/nonce');
 
-            if(nonceResponse.status !== 200) throw new Error('Error getting nonce')
+            if (nonceResponse.status !== 200) throw new Error('Error getting nonce');
 
             const { nonce } = nonceResponse.data;
-            console.log('Nonce from api', nonce);
+
             const message = new SiweMessage({
                 domain: 'localhost:5173',
                 address,
@@ -39,9 +48,8 @@ export const SiweProvider = ({ children }: { children: React.ReactNode }) => {
                 signature,
             });
 
-            // if(verifyResponse.status !== 200) throw new Error()
-
-            console.log('Verfication Auth', verifyResponse);
+            if (verifyResponse.status !== 201) throw new Error();
+            console.log('Here');
 
             setIsAuthenticated(verifyResponse.data.authenticated);
         } catch (error) {
