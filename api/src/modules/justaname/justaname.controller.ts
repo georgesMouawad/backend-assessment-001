@@ -13,11 +13,21 @@ export class JustaNameController {
         @Body() request: Subdomain,
         @Res() response: Response,
     ): Promise<any> {
+        console.log('controller', request)
         const subdomain = await this.justaNameService.addSubdomain(request);
         response.status(subdomain.error ? 500 : 201).send(subdomain);
     }
 
-    @Get('/siwe')
+    @Post('/subdomain/revoke')
+    async RevokeSubdomain(
+        @Body() request: Subdomain,
+        @Res() response: Response,
+    ): Promise<any> {
+        const revokeSubdomain = await this.justaNameService.revokeSubdomain(request)
+        response.status(revokeSubdomain.error ? 500 : 200)
+    }
+
+    @Get('/requestchallenge')
     async requestChallenge(@Query() query: RequestChallenge) {
         return this.justaNameService.requestChallenge(query);
     }

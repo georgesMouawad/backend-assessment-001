@@ -17,7 +17,7 @@ export class JustaNameService implements OnModuleInit {
         this.origin = this.configService.get('JUSTANAME_ORIGIN');
         this.ensDomain = this.configService.get('JUSTANAME_ENS_DOMAIN');
     }
-    
+
     async onModuleInit() {
         await this.init();
     }
@@ -29,6 +29,53 @@ export class JustaNameService implements OnModuleInit {
     }
 
     async addSubdomain(request: Subdomain): Promise<any> {
+        if (!request.username) {
+            return {
+                message: 'Username is required',
+            };
+        }
+
+        console.log('REQUEST', request)
+
+        try {
+
+            const params: any = {
+                username: request.username,
+                ensDomain: this.ensDomain,
+                chainId: this.chainId,
+            };
+
+            // console.log('Username', params.username);
+            // console.log('ENSDOM', params.ensDomain);
+            // console.log('ChainId', params.chainId);
+
+            if (request.isAdmin !== undefined && request.isAdmin) {
+                console.log('HERE ADMIN')
+                params.text = [{ key: 'admin', value: JSON.stringify([`${request.username}.${this.ensDomain}`]) }];
+                console.log('textRecords', params.text)
+            }
+
+            // console.log('xSig', request.signature);
+            // console.log('xAdd', request.address);
+            // console.log('xMes', request.message);
+            console.log('END')
+
+            const addResponse = await this.justaName.subnames.addSubname(params, {
+                xSignature: request.signature,
+                xAddress: request.address,
+                xMessage: request.message,
+            });
+
+            return addResponse;
+
+        } catch (error) {
+            return {
+                error: error.message
+            };
+        }
+    }
+
+    async revokeSubdomain(request: Subdomain): Promise<any> {
 
         if (!request.username) {
             return {
@@ -44,23 +91,20 @@ export class JustaNameService implements OnModuleInit {
                 chainId: this.chainId,
             };
 
-            if (request.isAdmin !== undefined && request.isAdmin) {
-                params.text = [{ key: 'admin', value: JSON.stringify([`${request.username}.${this.ensDomain}`]) }];
-            }
-
-            const addResponse = await this.justaName.subnames.addSubname(params, {
+            const revokeResponse = await this.justaName.subnames.revokeSubname(params, {
                 xSignature: request.signature,
                 xAddress: request.address,
                 xMessage: request.message,
             });
 
-            return addResponse;
+            return revokeResponse;
 
         } catch (error) {
             return {
                 error: error.message
             };
         }
+
     }
 
     async requestChallenge(request: RequestChallenge): Promise<any> {
@@ -78,7 +122,6 @@ export class JustaNameService implements OnModuleInit {
                 origin: this.origin,
                 address: request.address,
                 domain: this.domain,
-                ttl: 1800000,
             });
 
             return challengeResponse;
