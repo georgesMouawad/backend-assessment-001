@@ -3,7 +3,6 @@ import { useSiwe } from '../../core/data/SiweProvider';
 const Auth = () => {
     const siwe = useSiwe();
     const signIn = siwe?.signIn;
-    const isAuthenticated = siwe?.isAuthenticated;
 
     return (
         <div className="full flex column center">

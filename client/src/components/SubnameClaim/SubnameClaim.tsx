@@ -11,9 +11,9 @@ const SubnameClaim = () => {
     const [username, setUsername] = useState<string>('');
     const [isAdmin, setIsAdmin] = useState<boolean>(false);
 
+    const { refetchSubnames } = useAccountSubnames();
     const { addSubname } = useAddSubname();
     const { getSignature } = useSubnameSignature();
-    const { refetchSubnames } = useAccountSubnames();
 
     const debouncedUsername = useDebounce(username, 750);
     const { isAvailable, isLoading } = useIsSubnameAvailable({
@@ -23,16 +23,16 @@ const SubnameClaim = () => {
 
     const handleClaim = async () => {
         isAdmin ? await handleAdminClaim() : await addSubname({ username: debouncedUsername });
+        await refetchSubnames();
         setUsername('');
         setIsAdmin(false);
-        await refetchSubnames();
     };
 
     const handleAdminClaim = async () => {
         const { signature, message, address } = await getSignature();
 
         try {
-            await sendRequest(requestMethods.POST, '/justaname/subdomain', {
+            await sendRequest(requestMethods.POST, '/justaname/subname', {
                 username,
                 address,
                 signature,
@@ -40,7 +40,7 @@ const SubnameClaim = () => {
                 isAdmin,
             });
         } catch (error) {
-            console.log('Error Claiming Subdomain: ', error);
+            console.log('Error Claiming Subname: ', error);
         }
     };
 

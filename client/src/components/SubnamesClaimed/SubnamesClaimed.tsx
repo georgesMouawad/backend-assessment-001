@@ -5,12 +5,11 @@ import { useAccountSubnames, useRevokeSubname } from '@justaname.id/react';
 import './index.css';
 
 const SubnamesClaimed = () => {
-    const { subnames, refetchSubnames } = useAccountSubnames();
+    const { subnames } = useAccountSubnames();
     const { revokeSubname } = useRevokeSubname();
     console.log(subnames);
     const handleRevoke = async (username: string) => {
         await revokeSubname({ username });
-        await refetchSubnames();
     };
 
     return (

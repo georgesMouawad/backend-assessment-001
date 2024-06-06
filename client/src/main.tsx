@@ -23,8 +23,8 @@ const config = getDefaultConfig({
 });
 
 const routes = {
-    addSubnameRoute: '/justaname/subdomain',
-    revokeSubnameRoute: '/justaname/subdomain/revoke',
+    addSubnameRoute: '/justaname/subname',
+    revokeSubnameRoute: '/justaname/subname/revoke',
     requestChallengeRoute: '/justaname/requestchallenge',
 };
 
