@@ -3,6 +3,10 @@
     margin: 16px;
 }
 
+.claimed>h3 {
+    font-weight: 500;
+}
+
 .subnames-container {
     display: flex;
     flex-wrap: wrap;

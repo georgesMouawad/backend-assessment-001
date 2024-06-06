@@ -15,7 +15,7 @@ const SubnamesClaimed = () => {
 
     return (
         <div className="claimed">
-            <h3>Claimed Domains under {ensDomain}</h3>
+            <h3>Claimed Subnames Under {ensDomain}</h3>
             <div className="subnames-container">
                 {subnames.map((subname) =>
                     subname.username ? (
