@@ -94,7 +94,6 @@ export class JustaNameService implements OnModuleInit {
 
                 const rootDomainSubname = this.ensDomain;
                 const rootDomain = await this.justaName.subnames.getBySubname({ subname: rootDomainSubname, chainId: this.chainId as ChainId })
-
                 const adminRecordIndex = rootDomain.data.textRecords.findIndex(record => record.key === 'admin');
 
                 if (adminRecordIndex >= 0) {
@@ -103,18 +102,9 @@ export class JustaNameService implements OnModuleInit {
                     }
                 }
 
-                await this.justaName.subnames.updateSubname({
-                    addresses: rootDomain.data.addresses,
-                    chainId: this.chainId,
-                    contentHash: rootDomain.data.contentHash,
-                    ensDomain: this.ensDomain,
-                    username: rootDomain.username,
-                    text: [...rootDomain.data.textRecords, { key: 'admin', value: JSON.stringify([`${request.username}.${this.ensDomain}`]) }]
-                }, {
-                    xSignature: request.signature,
-                    xAddress: request.address,
-                    xMessage: request.message
-                })
+                const textRecords = [...rootDomain.data.textRecords, { key: 'admin', value: JSON.stringify([`${request.username}.${this.ensDomain}`]) }]
+
+                this.updateDomainRecords(rootDomain, request, textRecords)
             }
 
             const addResponse = await this.justaName.subnames.addSubname(params, {
@@ -139,7 +129,6 @@ export class JustaNameService implements OnModuleInit {
                 message: 'Username is required',
             };
         }
-
 
         try {
 
