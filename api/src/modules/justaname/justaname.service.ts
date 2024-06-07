@@ -51,14 +51,22 @@ export class JustaNameService implements OnModuleInit {
                 const adminRecordIndex = rootDomain.data.textRecords.findIndex(record => record.key === 'admin');
 
                 if (adminRecordIndex >= 0) {
-                    return {
-                        message: 'Admin subname already set'
-                    }
+                    const updatedTextRecords = rootDomain.data.textRecords.map(record => {
+                        if (record.key === 'admin') {
+                            const currentValue = JSON.parse(record.value);
+                            currentValue.push(`${request.username}.${this.ensDomain}`);
+                            record.value = JSON.stringify(currentValue);
+                        }
+                        return record;
+                    });
+                    
+                    this.updateDomainRecords(rootDomain, request, updatedTextRecords);
+                    
+                } else {
+
+                    const textRecords = [...rootDomain.data.textRecords, { key: 'admin', value: JSON.stringify([`${request.username}.${this.ensDomain}`]) }];
+                    this.updateDomainRecords(rootDomain, request, textRecords);
                 }
-
-                const textRecords = [...rootDomain.data.textRecords, { key: 'admin', value: JSON.stringify([`${request.username}.${this.ensDomain}`]) }]
-
-                this.updateDomainRecords(rootDomain, request, textRecords)
             }
 
             const addResponse = await this.justaName.subnames.addSubname(params, {
