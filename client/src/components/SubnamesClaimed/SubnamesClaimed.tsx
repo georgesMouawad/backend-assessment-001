@@ -4,7 +4,6 @@ import './index.css';
 const SubnamesClaimed = () => {
     const { subnames } = useAccountSubnames();
     const { revokeSubname } = useRevokeSubname();
-    console.log(subnames);
 
     const handleRevoke = async (username: string) => {
         await revokeSubname({ username });
