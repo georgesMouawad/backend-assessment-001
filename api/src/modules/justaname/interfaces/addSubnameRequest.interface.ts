@@ -1,4 +1,4 @@
-export interface Subname {
+export interface AddSubnameRequest {
     username: string;
     address: string;
     signature: string;

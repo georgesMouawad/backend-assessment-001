@@ -1,8 +1,7 @@
 import { Controller, Post, Body, Res, Get, Query } from '@nestjs/common';
 import { JustaNameService } from './justaname.service';
 import { Response } from 'express';
-import { Subname } from './interfaces/subname.interface';
-import { RequestChallenge } from './interfaces';
+import { AddSubnameRequest, RequestChallenge } from './interfaces';
 
 @Controller('/justaname')
 export class JustaNameController {
@@ -10,17 +9,16 @@ export class JustaNameController {
 
     @Post('/subname')
     async addSubname(
-        @Body() request: Subname,
+        @Body() request: AddSubnameRequest,
         @Res() response: Response,
     ): Promise<any> {
-        console.log('controller', request)
         const subname = await this.justaNameService.addSubname(request);
         response.status(subname.error ? 500 : 201).send(subname);
     }
 
     @Post('/subname/revoke')
     async RevokeSubname(
-        @Body() request: Subname,
+        @Body() request: AddSubnameRequest,
         @Res() response: Response,
     ): Promise<any> {
         const revokeSubname = await this.justaNameService.revokeSubname(request)

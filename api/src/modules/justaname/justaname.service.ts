@@ -1,7 +1,7 @@
 import { ChainId, JustaName } from '@justaname.id/sdk';
 import { Injectable, OnModuleInit } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { Subname, RequestChallenge } from './interfaces';
+import { AddSubnameRequest, RequestChallenge } from './interfaces';
 
 @Injectable()
 export class JustaNameService implements OnModuleInit {
@@ -28,7 +28,7 @@ export class JustaNameService implements OnModuleInit {
         });
     }
 
-    async addSubname(request: Subname): Promise<any> {
+    async addSubname(request: AddSubnameRequest): Promise<any> {
         if (!request.username) {
             return {
                 message: 'Username is required',
@@ -44,9 +44,7 @@ export class JustaNameService implements OnModuleInit {
             };
 
             if (request.isAdmin !== undefined && request.isAdmin) {
-                console.log('HERE ADMIN')
                 params.text = [{ key: 'admin', value: JSON.stringify([`${request.username}.${this.ensDomain}`]) }];
-                console.log('textRecords', params.text)
             }
 
             const addResponse = await this.justaName.subnames.addSubname(params, {
@@ -82,7 +80,7 @@ export class JustaNameService implements OnModuleInit {
         }
     }
 
-    async revokeSubname(request: Subname): Promise<any> {
+    async revokeSubname(request: AddSubnameRequest): Promise<any> {
 
         if (!request.username) {
             return {

@@ -1,2 +1,2 @@
-export * from './subname.interface';
+export * from './addSubnameRequest.interface';
 export * from './requestChallenge.interface';
