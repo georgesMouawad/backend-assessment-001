@@ -24,7 +24,7 @@ export class AuthService implements OnModuleInit {
     });
   }
 
-  generateNonce(req: Request): string {
+  generateNonce(req?: Request): string {
     const nonce = generateNonce();
     req.session.nonce = nonce;
     return nonce;
@@ -37,6 +37,13 @@ export class AuthService implements OnModuleInit {
 
       if (success && data.address) {
         req.session.siwe = data;
+
+        if (typeof data.expirationTime === 'undefined') {
+          const expirationTime = new Date();
+          expirationTime.setHours(expirationTime.getHours() + 1);
+          data.expirationTime = expirationTime.toISOString();
+        }
+
         req.session.cookie.expires = new Date(data.expirationTime);
         req.session.save();
         return true;

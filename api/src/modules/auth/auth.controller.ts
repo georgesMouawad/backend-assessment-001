@@ -1,15 +1,16 @@
 import { AuthService } from './auth.service';
-import { Controller, Post, Body, Get, Query, UseGuards } from '@nestjs/common';
+import { Controller, Post, Body, Get, Query, UseGuards, Req } from '@nestjs/common';
 import { CheckAdminSubnameRequest } from './interfaces/checkAdminSubnameRequest.interface';
 import { AuthGuard } from './guards/auth.guard';
+import { Request } from 'express';
 
 @Controller('auth')
 export class AuthController {
     constructor(private readonly authService: AuthService) { }
 
     @Get('nonce')
-    getNonce() {
-        const nonce = this.authService.generateNonce();
+    getNonce(@Req() req: Request) {
+        const nonce = this.authService.generateNonce(req);
         return { nonce };
     }
 
@@ -24,14 +25,13 @@ export class AuthController {
     }
 
     @Post('authenticate')
-    @UseGuards(AuthGuard)
-    async authenticate(@Body() body: { message: string; signature: string }) {
-        const isAuthenticated = await this.authService.authenticate(body.message, body.signature);
-        if (isAuthenticated) {
-            return { authenticated: true };
-        } else {
-            return { authenticated: false };
-        }
+    async authenticate(@Req() req: Request, @Body() body: { message: string; signature: string }) {
+      const isAuthenticated = await this.authService.authenticate(body.message, body.signature, req);
+      if (isAuthenticated) {
+        return { authenticated: true };
+      } else {
+        return { authenticated: false };
+      }
     }
 }
 
