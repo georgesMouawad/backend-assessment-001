@@ -3,6 +3,7 @@ import { SiweMessage } from 'siwe';
 import { useAccount, useSignMessage } from 'wagmi';
 import { requestMethods, sendRequest } from '../tools/apiRequest';
 import { useNavigate } from 'react-router-dom';
+import { useAccountSubnames } from '@justaname.id/react';
 
 const SiweContext = createContext<{
     signIn: () => Promise<void>;
@@ -21,13 +22,14 @@ export const SiweProvider = ({ children }: { children: React.ReactNode }) => {
     const navigate = useNavigate();
     const { address } = useAccount();
     const { signMessageAsync } = useSignMessage();
+    const { subnames } = useAccountSubnames();
 
     useEffect(() => {
         // if (isAuthenticated) {
         //     navigate('/');
         // }
         checkAdminSubnames();
-    }, [isAuthenticated, navigate]);
+    }, [isAuthenticated, subnames]);
 
     const checkAdminSubnames = async () => {
         try {
