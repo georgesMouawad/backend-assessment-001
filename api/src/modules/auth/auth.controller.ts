@@ -12,8 +12,8 @@ export class AuthController {
         return { nonce };
     }
 
-    @Get('adminSubname')
-    async checkAdminSubname(@Query() query: CheckAdminSubnameRequest) {
+    @Get('adminsubname')
+    async checkAdminSubname(@Query() query: CheckAdminSubnameRequest) {      
         const checkAdminSubname = await this.authService.checkAdminSubnames(query)
         if (checkAdminSubname) {
             return { admin: true };
