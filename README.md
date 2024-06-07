@@ -1,10 +1,10 @@
-### JustAName Integration Demonstration:
+### Demonstration:
 
 <div style="text-align:center;">
   <img src="./README/demo.gif" alt="DemoGif" />
 </div>
 
-### Running JustAName Integration:
+### How to Run:
 
 1. Clone the repository:
     ```sh
