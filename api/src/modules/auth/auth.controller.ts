@@ -1,6 +1,7 @@
 import { AuthService } from './auth.service';
-import { Controller, Post, Body, Get, Query } from '@nestjs/common';
+import { Controller, Post, Body, Get, Query, UseGuards } from '@nestjs/common';
 import { CheckAdminSubnameRequest } from './interfaces/checkAdminSubnameRequest.interface';
+import { AuthGuard } from './guards/auth.guard';
 
 @Controller('auth')
 export class AuthController {
@@ -23,6 +24,7 @@ export class AuthController {
     }
 
     @Post('authenticate')
+    @UseGuards(AuthGuard)
     async authenticate(@Body() body: { message: string; signature: string }) {
         const isAuthenticated = await this.authService.authenticate(body.message, body.signature);
         if (isAuthenticated) {

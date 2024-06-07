@@ -1,13 +1,15 @@
-import { Controller, Post, Body, Res, Get, Query } from '@nestjs/common';
+import { Controller, Post, Body, Res, Get, Query, UseGuards } from '@nestjs/common';
 import { JustaNameService } from './justaname.service';
 import { Response } from 'express';
 import { AddSubnameRequest, RequestChallenge } from './interfaces';
+import { AuthGuard } from '../auth/guards/auth.guard';
 
 @Controller('/justaname')
 export class JustaNameController {
     constructor(private readonly justaNameService: JustaNameService) { }
 
     @Post('/subname')
+    @UseGuards(AuthGuard)
     async addSubname(
         @Body() request: AddSubnameRequest,
         @Res() response: Response,
@@ -17,6 +19,7 @@ export class JustaNameController {
     }
 
     @Post('/subname/revoke')
+    @UseGuards(AuthGuard)
     async RevokeSubname(
         @Body() request: AddSubnameRequest,
         @Res() response: Response,
@@ -26,6 +29,7 @@ export class JustaNameController {
     }
 
     @Get('/requestchallenge')
+    @UseGuards(AuthGuard)
     async requestChallenge(@Query() query: RequestChallenge) {
         return this.justaNameService.requestChallenge(query);
     }

@@ -2,15 +2,15 @@ import { ChainId, JustaName } from '@justaname.id/sdk';
 import { Injectable, OnModuleInit } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { SiweMessage, generateNonce } from 'siwe';
+import { Request } from 'express';
 import { CheckAdminSubnameRequest } from './interfaces/checkAdminSubnameRequest.interface';
-import * as session from 'express-session';
 
 @Injectable()
 export class AuthService implements OnModuleInit {
   justaName: JustaName;
   chainId: number;
 
-  constructor(readonly configService: ConfigService, readonly session: session) {
+  constructor(private readonly configService: ConfigService) {
     this.chainId = parseInt(this.configService.get('JUSTANAME_CHAIN_ID'));
   }
 
@@ -24,26 +24,25 @@ export class AuthService implements OnModuleInit {
     });
   }
 
-  generateNonce(): string {
-    return generateNonce();
+  generateNonce(req: Request): string {
+    const nonce = generateNonce();
+    req.session.nonce = nonce;
+    return nonce;
   }
 
-  async authenticate(message: string, signature: string): Promise<boolean> {
+  async authenticate(message: string, signature: string, req: Request): Promise<boolean> {
     try {
-
       const siweMessage = new SiweMessage(message);
       const { success, data } = await siweMessage.verify({ signature });
 
       if (success && data.address) {
-        this.session.nonce = generateNonce();
-        this.session.siwe = data;
-        this.session.cookie.expires = new Date(data.expirationTime);
-        this.session.save();
+        req.session.siwe = data;
+        req.session.cookie.expires = new Date(data.expirationTime);
+        req.session.save();
         return true;
       } else {
         throw new Error();
       }
-
     } catch (error) {
       throw new Error('Authentication failed: ' + error.message);
     }
@@ -51,13 +50,11 @@ export class AuthService implements OnModuleInit {
 
   async checkAdminSubnames(request: CheckAdminSubnameRequest): Promise<boolean> {
     try {
-
-      const domain = await this.justaName.subnames.getBySubname({ subname: request.domain, chainId: this.chainId as ChainId })
+      const domain = await this.justaName.subnames.getBySubname({ subname: request.domain, chainId: this.chainId as ChainId });
       const adminRecordIndex = domain.data.textRecords.findIndex(record => record.key === 'admin');
       return adminRecordIndex >= 0;
-
     } catch (error) {
-      throw new Error('Checking fo admin subname failed: ' + error.message);
+      throw new Error('Checking for admin subname failed: ' + error.message);
     }
   }
 }
