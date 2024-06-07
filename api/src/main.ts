@@ -1,6 +1,7 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import * as dotenv from 'dotenv';
+import * as session from 'express-session';
 
 dotenv.config();
 
@@ -38,6 +39,16 @@ async function bootstrap() {
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     credentials: true,
   })
+
+  app.use(
+    session({
+      name: 'justasession',
+      secret: 'mysecretkeymysecretkey',
+      resave: false,
+      saveUninitialized: false,
+      cookie: { secure: false, sameSite: true }
+    })
+  );
 
   await app.listen(3001);
   console.log('Server is running')

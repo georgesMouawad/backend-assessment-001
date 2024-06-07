@@ -13,7 +13,7 @@ export class JustaNameController {
         @Res() response: Response,
     ): Promise<any> {
         const subname = await this.justaNameService.addSubname(request);
-        response.status(subname.error ? 500 : 201).send(subname);
+        response.status(subname?.error ? 500 : 201).send(subname);
     }
 
     @Post('/subname/revoke')
@@ -22,7 +22,7 @@ export class JustaNameController {
         @Res() response: Response,
     ): Promise<any> {
         const revokeSubname = await this.justaNameService.revokeSubname(request)
-        response.status(revokeSubname.error ? 500 : 200).send(revokeSubname)
+        response.status(revokeSubname?.error ? 500 : 200).send(revokeSubname)
     }
 
     @Get('/requestchallenge')

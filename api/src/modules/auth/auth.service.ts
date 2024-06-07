@@ -3,13 +3,14 @@ import { Injectable, OnModuleInit } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { SiweMessage, generateNonce } from 'siwe';
 import { CheckAdminSubnameRequest } from './interfaces/checkAdminSubnameRequest.interface';
+import * as session from 'express-session';
 
 @Injectable()
 export class AuthService implements OnModuleInit {
   justaName: JustaName;
   chainId: number;
 
-  constructor(readonly configService: ConfigService) {
+  constructor(readonly configService: ConfigService, readonly session: session) {
     this.chainId = parseInt(this.configService.get('JUSTANAME_CHAIN_ID'));
   }
 
@@ -34,6 +35,10 @@ export class AuthService implements OnModuleInit {
       const { success, data } = await siweMessage.verify({ signature });
 
       if (success && data.address) {
+        this.session.nonce = generateNonce();
+        this.session.siwe = data;
+        this.session.cookie.expires = new Date(data.expirationTime);
+        this.session.save();
         return true;
       } else {
         throw new Error();
