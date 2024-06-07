@@ -29,9 +29,8 @@ const SubnameClaim = () => {
     };
 
     const handleAdminClaim = async () => {
-        const { signature, message, address } = await getSignature();
-
         try {
+            const { signature, message, address } = await getSignature();
             await sendRequest(requestMethods.POST, '/justaname/subname', {
                 username,
                 address,

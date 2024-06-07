@@ -10,7 +10,7 @@ const AuthenticatedRoutes = ({ children }: { children: React.ReactNode }) => {
     const navigate = useNavigate();
 
     const validate = () => {
-        if (!isAuthenticated) {
+        if (!isAuthenticated) {           
             navigate('/auth');
         } else {
             console.log('User is Logged In');

@@ -1,20 +1,15 @@
-import React from 'react';
-import { useSiwe } from '../../core/data/SiweProvider';
-import { Navigate } from 'react-router-dom';
+import Links from '../../components/Links/Links';
 
+import './index.css'
 
 const Admin = () => {
-    const siwe = useSiwe();
-    const isAuthenticated = siwe?.isAuthenticated ?? false;
-
-    if (!isAuthenticated) {
-        return <Navigate to="/login" />;
-    }
-
     return (
-        <div>
-            <h1>Admin Page</h1>
-            <p>Welcome, admin!</p>
+        <div className='admin'>
+            <Links defaultDestination="/" buttonText="Home" />
+            <div className="full flex column center">
+                <h1>Admin Page</h1>
+                <p>Welcome!</p>
+            </div>
         </div>
     );
 };

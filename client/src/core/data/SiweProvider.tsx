@@ -4,22 +4,40 @@ import { useAccount, useSignMessage } from 'wagmi';
 import { requestMethods, sendRequest } from '../tools/apiRequest';
 import { useNavigate } from 'react-router-dom';
 
-const SiweContext = createContext<{ signIn: () => Promise<void>; isAuthenticated: boolean } | null>(null);
+const SiweContext = createContext<{
+    signIn: () => Promise<void>;
+    isAuthenticated: boolean;
+    isAdminSubnameAvailable: boolean;
+} | null>(null);
+const ensDomain = import.meta.env.VITE_APP_ENS_DOMAIN as string;
 
 // eslint-disable-next-line react-refresh/only-export-components
 export const useSiwe = () => useContext(SiweContext);
 
 export const SiweProvider = ({ children }: { children: React.ReactNode }) => {
+    const [isAuthenticated, setIsAuthenticated] = useState(false);
+    const [isAdminSubnameAvailable, setIsAdminSubnameAvailable] = useState(false);
+
+    const navigate = useNavigate();
     const { address } = useAccount();
     const { signMessageAsync } = useSignMessage();
-    const [isAuthenticated, setIsAuthenticated] = useState(false);
-    const navigate = useNavigate();
 
     useEffect(() => {
-        if (isAuthenticated) {
-            navigate('/');
-        }
+        // if (isAuthenticated) {
+        //     navigate('/');
+        // }
+        checkAdminSubnames();
     }, [isAuthenticated, navigate]);
+
+    const checkAdminSubnames = async () => {
+        try {
+            const checkResponse = await sendRequest(requestMethods.GET, `/auth/adminsubname?domain=${ensDomain}`);
+            if (checkResponse.status !== 200) throw new Error();
+            setIsAdminSubnameAvailable(checkResponse.data.admin);
+        } catch (error) {
+            console.log('Error checkign for admin subname', error);
+        }
+    };
 
     const getSiweNonce = async () => {
         try {
@@ -32,7 +50,6 @@ export const SiweProvider = ({ children }: { children: React.ReactNode }) => {
     };
 
     const createSiweMessage = async (statement: string) => {
-
         const { nonce } = await getSiweNonce();
 
         const message = new SiweMessage({
@@ -65,16 +82,21 @@ export const SiweProvider = ({ children }: { children: React.ReactNode }) => {
 
     const signIn = async () => {
         try {
-            
             const statement = 'Sign in with Ethereum';
             const message = await createSiweMessage(statement);
             const signature = await signMessageAsync({ message });
 
             await authenticate(message, signature);
+
+            navigate('/');
         } catch (error) {
             console.error('Error signing in with Ethereum:', error);
         }
     };
 
-    return <SiweContext.Provider value={{ signIn, isAuthenticated }}>{children}</SiweContext.Provider>;
+    return (
+        <SiweContext.Provider value={{ signIn, isAuthenticated, isAdminSubnameAvailable }}>
+            {children}
+        </SiweContext.Provider>
+    );
 };

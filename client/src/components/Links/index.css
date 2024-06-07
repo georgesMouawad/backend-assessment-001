@@ -1,0 +1,10 @@
+.links {
+    padding: 8px 16px;
+    color: #868e96;
+    font-weight: 500;
+}
+
+.links > span:hover {
+    cursor: pointer;
+    color: #212529;
+}
