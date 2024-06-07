@@ -50,10 +50,7 @@ export class JustaNameService implements OnModuleInit {
 
     async checkAndUpdateRecords(domain: string, request: AddSubnameRequest) {
 
-        console.log('Checking Domain');
-
         const rootDomain = await this.justaName.subnames.getBySubname({ subname: domain, chainId: this.chainId as ChainId });
-
         const adminRecord = await this.getDomainAdminRecord(rootDomain);
 
         if (adminRecord) {
@@ -61,11 +58,6 @@ export class JustaNameService implements OnModuleInit {
             const subname = request.username + '.' + domain;
             const adminValues = JSON.parse(adminRecord.value);
             const subnameIndex = adminValues.indexOf(subname);
-
-            console.log('admin record', adminRecord);
-            console.log('admin values', adminValues);
-            console.log('subname index', subnameIndex);
-
 
             if (subnameIndex >= 0) {
                 adminValues.splice(subnameIndex, 1);
@@ -78,7 +70,6 @@ export class JustaNameService implements OnModuleInit {
 
                 console.log('New records', rootDomain.data.textRecords);
 
-                return
                 await this.updateDomainRecords(rootDomain, request, rootDomain.data.textRecords);
             }
         }
@@ -149,8 +140,6 @@ export class JustaNameService implements OnModuleInit {
             };
         }
 
-        this.checkAndUpdateRecords(this.ensDomain, request)
-        return
 
         try {
 
@@ -166,6 +155,7 @@ export class JustaNameService implements OnModuleInit {
                 xMessage: request.message,
             });
 
+            this.checkAndUpdateRecords(this.ensDomain, request)
 
             return revokeResponse;
 
@@ -202,7 +192,4 @@ export class JustaNameService implements OnModuleInit {
             };
         }
     }
-
-
-
 }
