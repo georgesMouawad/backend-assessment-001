@@ -1,5 +1,6 @@
-import { Controller, Post, Body, Get } from '@nestjs/common';
 import { AuthService } from './auth.service';
+import { Controller, Post, Body, Get, Query } from '@nestjs/common';
+import { CheckAdminSubnameRequest } from './interfaces/checkAdminSubnameRequest.interface';
 
 @Controller('auth')
 export class AuthController {
@@ -9,6 +10,16 @@ export class AuthController {
     getNonce() {
         const nonce = this.authService.generateNonce();
         return { nonce };
+    }
+
+    @Get('adminSubname')
+    async checkAdminSubname(@Query() query: CheckAdminSubnameRequest) {
+        const checkAdminSubname = await this.authService.checkAdminSubnames(query)
+        if (checkAdminSubname) {
+            return { admin: true };
+        } else {
+            return { admin: false };
+        }
     }
 
     @Post('authenticate')

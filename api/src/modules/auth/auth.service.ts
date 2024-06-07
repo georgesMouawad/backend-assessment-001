@@ -2,6 +2,7 @@ import { ChainId, JustaName } from '@justaname.id/sdk';
 import { Injectable, OnModuleInit } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { SiweMessage, generateNonce } from 'siwe';
+import { CheckAdminSubnameRequest } from './interfaces/checkAdminSubnameRequest.interface';
 
 @Injectable()
 export class AuthService implements OnModuleInit {
@@ -43,10 +44,10 @@ export class AuthService implements OnModuleInit {
     }
   }
 
-  async checkAdminSubnames(subname: string): Promise<boolean> {
+  async checkAdminSubnames(request: CheckAdminSubnameRequest): Promise<boolean> {
     try {
 
-      const domain = await this.justaName.subnames.getBySubname({ subname, chainId: this.chainId as ChainId })
+      const domain = await this.justaName.subnames.getBySubname({ subname: request.domain, chainId: this.chainId as ChainId })
       const adminRecordIndex = domain.data.textRecords.findIndex(record => record.key === 'admin');
       return adminRecordIndex >= 0;
 
