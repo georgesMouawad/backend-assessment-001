@@ -1,10 +1,11 @@
 import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
-import { CustomRequest } from '../interfaces/customRequest.interface';
 
 @Injectable()
 export class AuthGuard implements CanActivate {
   canActivate(context: ExecutionContext): boolean {
-    const request = context.switchToHttp().getRequest<CustomRequest>();
+    const request = context.switchToHttp().getRequest();
+    console.log('authguard request session', request.session);
+    
     return !!(request.session && request.session.siwe && request.session.siwe.address);
   }
 }

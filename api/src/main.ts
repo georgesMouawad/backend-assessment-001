@@ -50,6 +50,11 @@ async function bootstrap() {
     })
   );
 
+  app.use((req, res, next) => {
+    req.session = req.session || {};
+    next();
+  });
+
   await app.listen(3001);
   console.log('Server is running')
 }

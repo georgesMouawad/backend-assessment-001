@@ -46,6 +46,7 @@ export class AuthService implements OnModuleInit {
 
         req.session.cookie.expires = new Date(data.expirationTime);
         req.session.save();
+        console.log('AUTHENTICATE SESSION', req.session);
         return true;
       } else {
         throw new Error();

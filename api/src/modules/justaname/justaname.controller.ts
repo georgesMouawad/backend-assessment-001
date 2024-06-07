@@ -9,7 +9,7 @@ export class JustaNameController {
     constructor(private readonly justaNameService: JustaNameService) { }
 
     @Post('/subname')
-    @UseGuards(AuthGuard)
+    // @UseGuards(AuthGuard)
     async addSubname(
         @Body() request: AddSubnameRequest,
         @Res() response: Response,
@@ -19,7 +19,7 @@ export class JustaNameController {
     }
 
     @Post('/subname/revoke')
-    @UseGuards(AuthGuard)
+    // @UseGuards(AuthGuard)
     async RevokeSubname(
         @Body() request: AddSubnameRequest,
         @Res() response: Response,
@@ -29,7 +29,7 @@ export class JustaNameController {
     }
 
     @Get('/requestchallenge')
-    @UseGuards(AuthGuard)
+    // @UseGuards(AuthGuard)
     async requestChallenge(@Query() query: RequestChallenge) {
         return this.justaNameService.requestChallenge(query);
     }
