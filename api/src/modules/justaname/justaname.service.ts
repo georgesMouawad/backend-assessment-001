@@ -1,4 +1,4 @@
-import { ChainId, JustaName } from '@justaname.id/sdk';
+import { ChainId, JustaName, SubnameGetBySubnameResponse, TextRecordResponse } from '@justaname.id/sdk';
 import { Injectable, OnModuleInit } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { AddSubnameRequest, RequestChallenge } from './interfaces';
@@ -26,6 +26,62 @@ export class JustaNameService implements OnModuleInit {
         this.justaName = await JustaName.init({
             apiKey: this.configService.get('JUSTANAME_API_KEY'),
         });
+    }
+
+    async getDomainAdminRecord(rootDomain: SubnameGetBySubnameResponse): Promise<TextRecordResponse | undefined> {
+        const domainAdminRecord = rootDomain.data.textRecords.find(record => record.key === 'admin');
+        return domainAdminRecord;
+    }
+
+    async updateDomainRecords(rootDomain: SubnameGetBySubnameResponse, request: AddSubnameRequest, textRecords: any[]) {
+        await this.justaName.subnames.updateSubname({
+            addresses: rootDomain.data.addresses,
+            chainId: this.chainId,
+            contentHash: rootDomain.data.contentHash,
+            ensDomain: this.ensDomain,
+            username: rootDomain.username,
+            text: textRecords,
+        }, {
+            xSignature: request.signature,
+            xAddress: request.address,
+            xMessage: request.message
+        });
+    }
+
+    async checkAndUpdateRecords(domain: string, request: AddSubnameRequest) {
+
+        console.log('Checking Domain');
+
+        const rootDomain = await this.justaName.subnames.getBySubname({ subname: domain, chainId: this.chainId as ChainId });
+
+        const adminRecord = await this.getDomainAdminRecord(rootDomain);
+
+        if (adminRecord) {
+
+            const subname = request.username + '.' + domain;
+            const adminValues = JSON.parse(adminRecord.value);
+            const subnameIndex = adminValues.indexOf(subname);
+
+            console.log('admin record', adminRecord);
+            console.log('admin values', adminValues);
+            console.log('subname index', subnameIndex);
+
+
+            if (subnameIndex >= 0) {
+                adminValues.splice(subnameIndex, 1);
+
+                if (adminValues.length > 0) {
+                    adminRecord.value = JSON.stringify(adminValues);
+                } else {
+                    rootDomain.data.textRecords = rootDomain.data.textRecords.filter(record => record.key !== 'admin');
+                }
+
+                console.log('New records', rootDomain.data.textRecords);
+
+                return
+                await this.updateDomainRecords(rootDomain, request, rootDomain.data.textRecords);
+            }
+        }
     }
 
     async addSubname(request: AddSubnameRequest): Promise<any> {
@@ -93,6 +149,9 @@ export class JustaNameService implements OnModuleInit {
             };
         }
 
+        this.checkAndUpdateRecords(this.ensDomain, request)
+        return
+
         try {
 
             const params: any = {
@@ -106,6 +165,7 @@ export class JustaNameService implements OnModuleInit {
                 xAddress: request.address,
                 xMessage: request.message,
             });
+
 
             return revokeResponse;
 
