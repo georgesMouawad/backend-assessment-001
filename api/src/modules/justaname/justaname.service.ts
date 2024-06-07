@@ -28,52 +28,6 @@ export class JustaNameService implements OnModuleInit {
         });
     }
 
-    async getDomainAdminRecord(rootDomain: SubnameGetBySubnameResponse): Promise<TextRecordResponse | undefined> {
-        const domainAdminRecord = rootDomain.data.textRecords.find(record => record.key === 'admin');
-        return domainAdminRecord;
-    }
-
-    async updateDomainRecords(rootDomain: SubnameGetBySubnameResponse, request: AddSubnameRequest, textRecords: any[]) {
-        await this.justaName.subnames.updateSubname({
-            addresses: rootDomain.data.addresses,
-            chainId: this.chainId,
-            contentHash: rootDomain.data.contentHash,
-            ensDomain: this.ensDomain,
-            username: rootDomain.username,
-            text: textRecords,
-        }, {
-            xSignature: request.signature,
-            xAddress: request.address,
-            xMessage: request.message
-        });
-    }
-
-    async checkAndUpdateRecords(domain: string, request: AddSubnameRequest) {
-
-        const rootDomain = await this.justaName.subnames.getBySubname({ subname: domain, chainId: this.chainId as ChainId });
-        const adminRecord = await this.getDomainAdminRecord(rootDomain);
-
-        if (adminRecord) {
-
-            const subname = request.username + '.' + domain;
-            const adminValues = JSON.parse(adminRecord.value);
-            const subnameIndex = adminValues.indexOf(subname);
-
-            if (subnameIndex >= 0) {
-                adminValues.splice(subnameIndex, 1);
-
-                if (adminValues.length > 0) {
-                    adminRecord.value = JSON.stringify(adminValues);
-                } else {
-                    rootDomain.data.textRecords = rootDomain.data.textRecords.filter(record => record.key !== 'admin');
-                }
-
-                console.log('New records', rootDomain.data.textRecords);
-
-                await this.updateDomainRecords(rootDomain, request, rootDomain.data.textRecords);
-            }
-        }
-    }
 
     async addSubname(request: AddSubnameRequest): Promise<any> {
         if (!request.username) {
@@ -179,6 +133,51 @@ export class JustaNameService implements OnModuleInit {
             return {
                 error: error.message,
             };
+        }
+    }
+
+    private async getDomainAdminRecord(rootDomain: SubnameGetBySubnameResponse): Promise<TextRecordResponse | undefined> {
+        return rootDomain.data.textRecords.find(record => record.key === 'admin');
+    }
+
+    private async updateDomainRecords(rootDomain: SubnameGetBySubnameResponse, request: AddSubnameRequest, textRecords: TextRecordResponse[] | {
+        key: string;
+        value: string;
+    }[]) {
+        await this.justaName.subnames.updateSubname({
+            addresses: rootDomain.data.addresses,
+            chainId: this.chainId,
+            contentHash: rootDomain.data.contentHash,
+            ensDomain: this.ensDomain,
+            username: rootDomain.username,
+            text: textRecords,
+        }, {
+            xSignature: request.signature,
+            xAddress: request.address,
+            xMessage: request.message,
+        });
+    }
+
+    private async checkAndUpdateRecords(domain: string, request: AddSubnameRequest) {
+        const rootDomain = await this.justaName.subnames.getBySubname({ subname: domain, chainId: this.chainId as ChainId });
+        const adminRecord = await this.getDomainAdminRecord(rootDomain);
+
+        if (adminRecord) {
+            const subname = `${request.username}.${domain}`;
+            const adminValues = JSON.parse(adminRecord.value);
+            const subnameIndex = adminValues.indexOf(subname);
+
+            if (subnameIndex >= 0) {
+                adminValues.splice(subnameIndex, 1);
+
+                if (adminValues.length > 0) {
+                    adminRecord.value = JSON.stringify(adminValues);
+                } else {
+                    rootDomain.data.textRecords = rootDomain.data.textRecords.filter(record => record.key !== 'admin');
+                }
+
+                await this.updateDomainRecords(rootDomain, request, rootDomain.data.textRecords);
+            }
         }
     }
 }
