@@ -57,7 +57,7 @@ const SubnameClaim = () => {
                         onChange={(e) => setUsername(e.target.value)}
                     />
                     <button
-                        className="claim-btn button bold size-l flex center"
+                        className="claim-btn primary-btn button bold size-l flex center"
                         onClick={handleClaim}
                         disabled={!isAvailable || !debouncedUsername}
                     >

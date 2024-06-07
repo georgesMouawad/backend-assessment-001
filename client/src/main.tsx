@@ -28,6 +28,17 @@ const routes = {
     requestChallengeRoute: '/justaname/requestchallenge',
 };
 
+// const customTheme = {
+//     colors: {
+//       connectButtonBackground: '#f76707',
+//       connectButtonText: '#FFFFFF',
+//       connectButtonBackgroundError: '#FF4A4A',
+//     },
+//     fonts: {
+//       body: 'Open Sans, sans-serif',
+//     },
+//   };
+
 ReactDOM.createRoot(document.getElementById('root')!).render(
     <React.StrictMode>
         <BrowserRouter>

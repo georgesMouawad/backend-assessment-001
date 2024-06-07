@@ -6,7 +6,7 @@
     gap: 8px;
 }
 
-.claimed>h3 {
+.claimed > h3 {
     font-weight: 500;
 }
 
@@ -18,8 +18,13 @@
 }
 
 .subname-item {
-    color: #111;
+    color: #495057;
     background-color: #f1f1f1;
     padding: 8px 12px;
     cursor: pointer;
+}
+
+.subname-item:hover {
+    color: #212529;
+    border-color: #868e96;
 }
