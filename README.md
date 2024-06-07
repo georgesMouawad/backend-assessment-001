@@ -1,6 +1,8 @@
 ### JustAName Integration Demonstration:
 
-
+<div style="text-align:center;">
+  <img src="./README/demo.gif" alt="DemoGif" />
+</div>
 
 ### Running JustAName Integration:
 
@@ -17,5 +19,6 @@
 3. Navigate to the 'api' directory, install NPM packages and run:
     ```sh
     cd api
+    npm i
     npm run start
     ```
