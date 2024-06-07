@@ -6,7 +6,7 @@ import './index.css';
 const Auth = () => {
     const siwe = useSiwe();
     const signIn = siwe?.signIn;
-    const address = useAccount();
+    const { address } = useAccount();
 
     return (
         <div className="auth full flex column center">

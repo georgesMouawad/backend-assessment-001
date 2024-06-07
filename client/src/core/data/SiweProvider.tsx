@@ -25,11 +25,9 @@ export const SiweProvider = ({ children }: { children: React.ReactNode }) => {
     const { subnames } = useAccountSubnames();
 
     useEffect(() => {
-        // if (isAuthenticated) {
-        //     navigate('/');
-        // }
+        if (!address) return;
         checkAdminSubnames();
-    }, [isAuthenticated, subnames]);
+    }, [isAuthenticated, subnames, address]);
 
     const checkAdminSubnames = async () => {
         try {
@@ -37,7 +35,7 @@ export const SiweProvider = ({ children }: { children: React.ReactNode }) => {
             if (checkResponse.status !== 200) throw new Error();
             setIsAdminSubnameAvailable(checkResponse.data.admin);
         } catch (error) {
-            console.log('Error checkign for admin subname', error);
+            console.log('Error checking for admin subname', error);
         }
     };
 
