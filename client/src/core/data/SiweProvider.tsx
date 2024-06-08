@@ -1,16 +1,16 @@
-import { createContext, useContext, useEffect, useState } from 'react';
+import { AxiosError } from 'axios';
 import { SiweMessage } from 'siwe';
-import { requestMethods, sendRequest } from '../tools/apiRequest';
+import { BrowserProvider } from 'ethers';
 import { useNavigate } from 'react-router-dom';
 import { useAccountSubnames } from '@justaname.id/react';
-import { BrowserProvider } from 'ethers';
+import { requestMethods, sendRequest } from '../tools/apiRequest';
+import { createContext, useContext, useEffect, useState } from 'react';
 
 const SiweContext = createContext<{
     signIn: () => Promise<void>;
     isAuthenticated: boolean;
     isAdminSubnameAvailable: boolean;
 } | null>(null);
-const ensDomain = import.meta.env.VITE_APP_ENS_DOMAIN as string;
 
 // eslint-disable-next-line react-refresh/only-export-components
 export const useSiwe = () => useContext(SiweContext);
@@ -20,25 +20,37 @@ export const SiweProvider = ({ children }: { children: React.ReactNode }) => {
     const [isAdminSubnameAvailable, setIsAdminSubnameAvailable] = useState(false);
 
     const navigate = useNavigate();
-    // const { address } = useAccount();
-    // const { signMessageAsync } = useSignMessage();
     const { subnames } = useAccountSubnames();
 
     const domain = window.location.host;
     const origin = window.location.origin;
     const provider = new BrowserProvider(window.ethereum);
-    // const chainId = await provider.getNetwork();
 
     useEffect(() => {
-        if (!isAuthenticated) return;
-        checkAdminSubnames();
+        isAuthenticated && checkAdminSubnames();
+        window.ethereum &&
+            window.ethereum.on('accountsChanged', (accounts: string[]) => {
+                if (accounts.length === 0) {
+                    clearSession();
+                }
+            });
+
+        return () => {
+            window.ethereum && window.ethereum.off('accountsChanged', clearSession);
+        };
     }, [isAuthenticated, subnames]);
+
+    useEffect(() => {
+        !isAuthenticated && checkSession();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     const checkAdminSubnames = async () => {
         try {
-            const checkResponse = await sendRequest(requestMethods.GET, `/auth/adminsubname?domain=${ensDomain}`);
-            if (checkResponse.status !== 200) throw new Error();
-            setIsAdminSubnameAvailable(checkResponse.data.admin);
+            const checkResponse = await sendRequest(requestMethods.GET, `/auth/check-admin`);
+            if (checkResponse && checkResponse.status === 200) {
+                setIsAdminSubnameAvailable(checkResponse.data);
+            }
         } catch (error) {
             console.log('Error checking for admin subname', error);
         }
@@ -47,15 +59,16 @@ export const SiweProvider = ({ children }: { children: React.ReactNode }) => {
     const getSiweNonce = async () => {
         try {
             const nonceResponse = await sendRequest(requestMethods.GET, '/auth/nonce');
-            if (nonceResponse.status !== 200) throw new Error();
-            return nonceResponse.data;
+            if (nonceResponse && nonceResponse.status === 201) {
+                return nonceResponse.data;
+            }
         } catch (error) {
             console.log('Error getting nonce', error);
         }
     };
 
     const createSiweMessage = async (address: string, statement: string) => {
-        const { nonce } = await getSiweNonce();
+        const nonce = await getSiweNonce();
 
         const message = new SiweMessage({
             domain,
@@ -80,9 +93,7 @@ export const SiweProvider = ({ children }: { children: React.ReactNode }) => {
                 signature,
             });
 
-            if (verifyResponse.status !== 201) throw new Error();
-
-            setIsAuthenticated(verifyResponse.data.authenticated);
+            verifyResponse && setIsAuthenticated(verifyResponse.data);
         } catch (error) {
             console.log('Error Authenticating', error);
         }
@@ -90,26 +101,43 @@ export const SiweProvider = ({ children }: { children: React.ReactNode }) => {
 
     const signIn = async () => {
         try {
-
             await connectWallet();
 
             const statement = 'Sign in with Ethereum';
-
             const signer = await provider.getSigner();
             const address = signer.address;
             const message = await createSiweMessage(address, statement);
             const signature = await signer.signMessage(message);
 
-            // console.log('Signer', signer)
-            // console.log('Message', message);
-            // console.log('Sig', signature);
-            // console.log('Address', address);
-            
             await authenticate(message, signature);
-
             navigate('/');
+            
         } catch (error) {
             console.error('Error signing in with Ethereum:', error);
+        }
+    };
+
+    const checkSession = async () => {
+        try {
+            const response = await sendRequest(requestMethods.GET, '/auth/check-session');
+            if (response && response.status === 200) {
+                setIsAuthenticated(true);
+            }
+        } catch (error) {
+            if ((error as AxiosError).response?.status === 403) {
+                setIsAuthenticated(false);
+            } else {
+                console.log('Error checking session:', error);
+            }
+        }
+    };
+
+    const clearSession = async () => {
+        try {
+            await sendRequest(requestMethods.POST, '/auth/logout');
+            setIsAuthenticated(false);
+        } catch (error) {
+            console.log('Error clearing session:', error);
         }
     };
 

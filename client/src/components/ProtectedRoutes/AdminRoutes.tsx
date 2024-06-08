@@ -12,7 +12,7 @@ const AdminRoutes = ({ children }: { children: React.ReactNode }) => {
         if (!isAuthenticated || !isAdminAvailable) {
             navigate('/');
         } else {
-            console.log('User has admin subname');
+            console.log('User has admin subnames');
         }
     }, [isAuthenticated, isAdminAvailable, navigate]);
 

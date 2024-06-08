@@ -1,6 +1,5 @@
 import { AuthService } from './auth.service';
-import { Controller, Post, Body, Get, Query, Req, Res, UseGuards } from '@nestjs/common';
-import { CheckAdminSubnameRequest } from './interfaces/checkAdminSubnameRequest.interface';
+import { Controller, Post, Body, Get, Req, Res, UseGuards } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { AuthGuard } from 'src/guards/auth.guard';
 
@@ -55,7 +54,5 @@ export class AuthController {
       }
     });
   }
-
-
 }
 

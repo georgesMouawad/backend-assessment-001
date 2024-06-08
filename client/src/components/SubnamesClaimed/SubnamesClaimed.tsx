@@ -18,7 +18,7 @@ const SubnamesClaimed = () => {
             </>
         );
     };
-
+   
     return (
         <div className="claimed">
             {subnames.map((subname) =>

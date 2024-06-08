@@ -26,7 +26,7 @@ const config = getDefaultConfig({
 const routes = {
     addSubnameRoute: '/justaname/subname',
     revokeSubnameRoute: '/justaname/subname/revoke',
-    requestChallengeRoute: '/justaname/requestchallenge',
+    requestChallengeRoute: '/justaname/request-challenge',
 };
 
 const myCustomTheme = merge(lightTheme(), {

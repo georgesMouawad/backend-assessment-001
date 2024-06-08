@@ -4,16 +4,22 @@ axios.defaults.baseURL = "http://localhost:3001";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const sendRequest = async (method: string, route: string, body?: any) => {
-    const response = await axios.request({
-        method: method,
-        url: route,
-        data: body,
-        headers: {
-            Accept: "application/json",
-        },
-    });
+    try {
+        const response = await axios.request({
+            method: method,
+            url: route,
+            data: body,
+            headers: {
+                Accept: "application/json",
+            },
+            withCredentials: true,
+        });
 
-    return response;
+        return response;
+
+    } catch (error) {
+        console.log('Error Axios', error)
+    }
 };
 
 export const requestMethods = {
@@ -21,4 +27,4 @@ export const requestMethods = {
     GET: "GET",
     PUT: "PUT",
     DELETE: "DELETE",
-  };
+};

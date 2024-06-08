@@ -1,12 +1,9 @@
-import { useAccount } from 'wagmi';
-import { ConnectButton } from '@rainbow-me/rainbowkit';
 import { useSiwe } from '../../core/data/SiweProvider';
 import './index.css';
 
 const Auth = () => {
     const siwe = useSiwe();
     const signIn = siwe?.signIn;
-    const { address } = useAccount();
 
     return (
         <div className="auth full flex column center">

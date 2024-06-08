@@ -29,6 +29,7 @@ const useSubnameClaimLogic = () => {
     const handleAdminClaim = async () => {
         try {
             const { signature, message, address } = await getSignature();
+            
             await sendRequest(requestMethods.POST, '/justaname/subname', {
                 username,
                 address,
