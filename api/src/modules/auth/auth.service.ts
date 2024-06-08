@@ -3,15 +3,16 @@ import { Injectable, OnModuleInit } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { SiweMessage, generateNonce } from 'siwe';
 import { Request } from 'express';
-import { CheckAdminSubnameRequest } from './interfaces/checkAdminSubnameRequest.interface';
 
 @Injectable()
 export class AuthService implements OnModuleInit {
   justaName: JustaName;
   chainId: number;
+  ensDomain: string;
 
   constructor(private readonly configService: ConfigService) {
     this.chainId = parseInt(this.configService.get('JUSTANAME_CHAIN_ID'));
+    this.ensDomain = this.configService.get('JUSTANAME_ENS_DOMAIN');
   }
 
   async onModuleInit() {
@@ -47,10 +48,10 @@ export class AuthService implements OnModuleInit {
     }
   }
 
-  async checkAdminSubnames(req: Request, request: CheckAdminSubnameRequest): Promise<boolean> {
+  async checkAdminSubnames(req: Request): Promise<boolean> {
     try {
 
-      const domain = await this.justaName.subnames.getBySubname({ subname: request.domain, chainId: this.chainId as ChainId });
+      const domain = await this.justaName.subnames.getBySubname({ subname: this.ensDomain, chainId: this.chainId as ChainId });
       const sessionAddress = req.session.siwe.address;
 
       const addressFound = domain.data.addresses.find(addr => addr.address === sessionAddress);
