@@ -1,7 +1,6 @@
 import { AuthService } from './auth.service';
-import { Controller, Post, Body, Get, Query, UseGuards, Req } from '@nestjs/common';
+import { Controller, Post, Body, Get, Query, Req } from '@nestjs/common';
 import { CheckAdminSubnameRequest } from './interfaces/checkAdminSubnameRequest.interface';
-import { AuthGuard } from './guards/auth.guard';
 import { Request } from 'express';
 
 @Controller('auth')
@@ -15,7 +14,6 @@ export class AuthController {
     }
 
     @Get('adminsubname')
-    // @UseGuards(AuthGuard)
     async checkAdminSubname(@Query() query: CheckAdminSubnameRequest) {      
         const checkAdminSubname = await this.authService.checkAdminSubnames(query)
         if (checkAdminSubname) {

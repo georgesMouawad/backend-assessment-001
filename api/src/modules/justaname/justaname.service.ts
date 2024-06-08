@@ -31,9 +31,7 @@ export class JustaNameService implements OnModuleInit {
 
     async addSubname(request: AddSubnameRequest): Promise<any> {
         if (!request.username) {
-            return {
-                message: 'Username is required',
-            };
+            throw new Error('Username is required')
         }
 
         try {
@@ -44,28 +42,14 @@ export class JustaNameService implements OnModuleInit {
                 chainId: this.chainId,
             };
 
+
             if (request.isAdmin !== undefined && request.isAdmin) {
-
-                const rootDomainSubname = this.ensDomain;
-                const rootDomain = await this.justaName.subnames.getBySubname({ subname: rootDomainSubname, chainId: this.chainId as ChainId })
-                const adminRecordIndex = rootDomain.data.textRecords.findIndex(record => record.key === 'admin');
-
-                if (adminRecordIndex >= 0) {
-                    const updatedTextRecords = rootDomain.data.textRecords.map(record => {
-                        if (record.key === 'admin') {
-                            const currentValue = JSON.parse(record.value);
-                            currentValue.push(`${request.username}.${this.ensDomain}`);
-                            record.value = JSON.stringify(currentValue);
-                        }
-                        return record;
-                    });
-                    
-                    this.updateDomainRecords(rootDomain, request, updatedTextRecords);
-                    
+                const rootDomain = await this.getRoodDomain();
+                const isOwner = await this.checkPrivilege(rootDomain, request);
+                if (isOwner) {
+                    await this.updateTextRecords(rootDomain, request);
                 } else {
-
-                    const textRecords = [...rootDomain.data.textRecords, { key: 'admin', value: JSON.stringify([`${request.username}.${this.ensDomain}`]) }];
-                    this.updateDomainRecords(rootDomain, request, textRecords);
+                    throw new Error('Unauthorized');
                 }
             }
 
@@ -106,7 +90,7 @@ export class JustaNameService implements OnModuleInit {
                 xMessage: request.message,
             });
 
-            this.checkAndUpdateRecords(this.ensDomain, request)
+            this.deleteDomainRecord(this.ensDomain, request)
 
             return revokeResponse;
 
@@ -144,20 +128,68 @@ export class JustaNameService implements OnModuleInit {
         }
     }
 
-    private async getDomainAdminRecord(rootDomain: SubnameGetBySubnameResponse): Promise<TextRecordResponse | undefined> {
-        return rootDomain.data.textRecords.find(record => record.key === 'admin');
+
+    private async getRoodDomain(): Promise<SubnameGetBySubnameResponse> {
+        const rootDomainSubname = this.ensDomain;
+        return this.justaName.subnames.getBySubname({ subname: rootDomainSubname, chainId: this.chainId as ChainId })
     }
 
-    private async updateDomainRecords(rootDomain: SubnameGetBySubnameResponse, request: AddSubnameRequest, textRecords: TextRecordResponse[] | {
+    private async checkPrivilege(rootDomain: SubnameGetBySubnameResponse, request: AddSubnameRequest) {
+
+        const addressFound = rootDomain.data.addresses.find(addr => addr.address === request.address);
+
+        if (!addressFound) {
+            return false
+        }
+
+        const verifyResponse = await this.justaName.siwe.verifyMessage({
+            address: request.address,
+            message: request.message,
+            signature: request.signature,
+        })
+
+
+        if (!verifyResponse.verified) {
+            return false
+        }
+
+        return true;
+    }
+
+    private async updateTextRecords(rootDomain: SubnameGetBySubnameResponse, request: AddSubnameRequest) {
+
+        let updatedTextRecords = [];
+
+        const adminRecordIndex = rootDomain.data.textRecords.findIndex(record => record.key === 'admin');
+
+        if (adminRecordIndex >= 0) {
+            updatedTextRecords = rootDomain.data.textRecords.map(record => {
+                if (record.key === 'admin') {
+                    const currentValue = JSON.parse(record.value);
+                    currentValue.push(`${request.username}.${this.ensDomain}`);
+                    record.value = JSON.stringify(currentValue);
+                }
+                return record;
+            });
+
+        } else {
+
+            updatedTextRecords = [...rootDomain.data.textRecords, { key: 'admin', value: JSON.stringify([`${request.username}.${this.ensDomain}`]) }];
+        }
+
+        await this.updateSubnameRecords(rootDomain, request, updatedTextRecords);
+    }
+
+    private async updateSubnameRecords(subname: SubnameGetBySubnameResponse, request: AddSubnameRequest, textRecords: TextRecordResponse[] | {
         key: string;
         value: string;
     }[]) {
         await this.justaName.subnames.updateSubname({
-            addresses: rootDomain.data.addresses,
+            addresses: subname.data.addresses,
             chainId: this.chainId,
-            contentHash: rootDomain.data.contentHash,
+            contentHash: subname.data.contentHash,
             ensDomain: this.ensDomain,
-            username: rootDomain.username,
+            username: subname.username,
             text: textRecords,
         }, {
             xSignature: request.signature,
@@ -166,9 +198,9 @@ export class JustaNameService implements OnModuleInit {
         });
     }
 
-    private async checkAndUpdateRecords(domain: string, request: AddSubnameRequest) {
+    private async deleteDomainRecord(domain: string, request: AddSubnameRequest) {
         const rootDomain = await this.justaName.subnames.getBySubname({ subname: domain, chainId: this.chainId as ChainId });
-        const adminRecord = await this.getDomainAdminRecord(rootDomain);
+        const adminRecord = rootDomain.data.textRecords.find(record => record.key === 'admin');
 
         if (adminRecord) {
             const subname = `${request.username}.${domain}`;
@@ -184,8 +216,9 @@ export class JustaNameService implements OnModuleInit {
                     rootDomain.data.textRecords = rootDomain.data.textRecords.filter(record => record.key !== 'admin');
                 }
 
-                await this.updateDomainRecords(rootDomain, request, rootDomain.data.textRecords);
+                await this.updateSubnameRecords(rootDomain, request, rootDomain.data.textRecords);
             }
         }
+
     }
 }
