@@ -1,9 +1,9 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 import { SiweMessage } from 'siwe';
-import { useAccount, useSignMessage } from 'wagmi';
 import { requestMethods, sendRequest } from '../tools/apiRequest';
 import { useNavigate } from 'react-router-dom';
 import { useAccountSubnames } from '@justaname.id/react';
+import { BrowserProvider } from 'ethers';
 
 const SiweContext = createContext<{
     signIn: () => Promise<void>;
@@ -20,14 +20,19 @@ export const SiweProvider = ({ children }: { children: React.ReactNode }) => {
     const [isAdminSubnameAvailable, setIsAdminSubnameAvailable] = useState(false);
 
     const navigate = useNavigate();
-    const { address } = useAccount();
-    const { signMessageAsync } = useSignMessage();
+    // const { address } = useAccount();
+    // const { signMessageAsync } = useSignMessage();
     const { subnames } = useAccountSubnames();
 
+    const domain = window.location.host;
+    const origin = window.location.origin;
+    const provider = new BrowserProvider(window.ethereum);
+    // const chainId = await provider.getNetwork();
+
     useEffect(() => {
-        if (!address) return;
+        if (!isAuthenticated) return;
         checkAdminSubnames();
-    }, [isAuthenticated, subnames, address]);
+    }, [isAuthenticated, subnames]);
 
     const checkAdminSubnames = async () => {
         try {
@@ -49,14 +54,14 @@ export const SiweProvider = ({ children }: { children: React.ReactNode }) => {
         }
     };
 
-    const createSiweMessage = async (statement: string) => {
+    const createSiweMessage = async (address: string, statement: string) => {
         const { nonce } = await getSiweNonce();
 
         const message = new SiweMessage({
-            domain: 'localhost:5173',
+            domain,
             address,
             statement,
-            uri: 'http://localhost:5173',
+            uri: origin,
             version: '1',
             chainId: import.meta.env.VITE_APP_CHAIN_ID as number,
             nonce,
@@ -64,6 +69,9 @@ export const SiweProvider = ({ children }: { children: React.ReactNode }) => {
 
         return message.prepareMessage();
     };
+
+    const connectWallet = () =>
+        provider.send('eth_requestAccounts', []).catch(() => console.log('User reject request to connect wallet'));
 
     const authenticate = async (message: string, signature: string) => {
         try {
@@ -82,10 +90,21 @@ export const SiweProvider = ({ children }: { children: React.ReactNode }) => {
 
     const signIn = async () => {
         try {
-            const statement = 'Sign in with Ethereum';
-            const message = await createSiweMessage(statement);
-            const signature = await signMessageAsync({ message });
 
+            await connectWallet();
+
+            const statement = 'Sign in with Ethereum';
+
+            const signer = await provider.getSigner();
+            const address = signer.address;
+            const message = await createSiweMessage(address, statement);
+            const signature = await signer.signMessage(message);
+
+            // console.log('Signer', signer)
+            // console.log('Message', message);
+            // console.log('Sig', signature);
+            // console.log('Address', address);
+            
             await authenticate(message, signature);
 
             navigate('/');

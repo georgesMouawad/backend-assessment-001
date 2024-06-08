@@ -10,13 +10,16 @@ const Auth = () => {
 
     return (
         <div className="auth full flex column center">
-            {!address ? (
+            {/* {!address ? (
                 <ConnectButton label="Connet Your Wallet" />
             ) : (
                 <button onClick={signIn} className="primary-btn btn-l border-radius-l">
                     Login
                 </button>
-            )}
+            )} */}
+            <button onClick={signIn} className="primary-btn btn-l border-radius-l">
+                Login
+            </button>
         </div>
     );
 };
