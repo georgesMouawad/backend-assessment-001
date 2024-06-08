@@ -42,18 +42,12 @@ async function bootstrap() {
 
   app.use(
     session({
-      name: 'justasession',
       secret: 'mysecretkeymysecretkey',
       resave: false,
       saveUninitialized: false,
-      cookie: { secure: false, sameSite: true }
+      cookie: { secure: false, sameSite: true, maxAge: 60 * 60 * 1000 }
     })
   );
-
-  app.use((req, res, next) => {
-    req.session = req.session || {};
-    next();
-  });
 
   await app.listen(3001);
   console.log('Server is running')

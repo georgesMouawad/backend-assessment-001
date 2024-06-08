@@ -24,27 +24,19 @@ export class AuthService implements OnModuleInit {
     });
   }
 
-  generateNonce(req?: Request): string {
-    const nonce = generateNonce();
-    req.session.nonce = nonce;
-    return nonce;
+  generateNonce(): string {
+    return generateNonce();
   }
 
-  async authenticate(message: string, signature: string, req: Request): Promise<boolean> {
+  async authenticate(req: Request, message: string, signature: string): Promise<boolean> {
     try {
+
       const siweMessage = new SiweMessage(message);
       const { success, data } = await siweMessage.verify({ signature });
 
       if (success && data.address) {
         req.session.siwe = data;
-
-        if (typeof data.expirationTime === 'undefined') {
-          const expirationTime = new Date();
-          expirationTime.setHours(expirationTime.getHours() + 1);
-          data.expirationTime = expirationTime.toISOString();
-        }
-
-        req.session.cookie.expires = new Date(data.expirationTime);
+        req.session.cookie.expires = new Date(Date.now() + 60 * 60 * 1000);
         req.session.save();
         console.log('AUTHENTICATE SESSION', req.session);
         return true;
@@ -58,9 +50,15 @@ export class AuthService implements OnModuleInit {
 
   async checkAdminSubnames(request: CheckAdminSubnameRequest): Promise<boolean> {
     try {
+
       const domain = await this.justaName.subnames.getBySubname({ subname: request.domain, chainId: this.chainId as ChainId });
+      // const addressFound = domain.data.addresses.find(addr => addr.address === request.domainaddress);
+
+      // if (!addressFound) return false;
+
       const adminRecordIndex = domain.data.textRecords.findIndex(record => record.key === 'admin');
       return adminRecordIndex >= 0;
+
     } catch (error) {
       throw new Error('Checking for admin subname failed: ' + error.message);
     }

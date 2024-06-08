@@ -1,4 +1,4 @@
-import { Controller, Post, Body, Res, Get, Query } from '@nestjs/common';
+import { Controller, Post, Body, Res, Get, Query, UseGuards } from '@nestjs/common';
 import { JustaNameService } from './justaname.service';
 import { Response } from 'express';
 import { AddSubnameRequest, RequestChallenge } from './interfaces';

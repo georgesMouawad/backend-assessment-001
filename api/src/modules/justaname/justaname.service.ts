@@ -34,6 +34,8 @@ export class JustaNameService implements OnModuleInit {
             throw new Error('Username is required')
         }
 
+        request.username = request.username.replace(/\s+/g, '').toLowerCase();
+
         try {
 
             const params: any = {
