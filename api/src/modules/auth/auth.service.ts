@@ -38,7 +38,6 @@ export class AuthService implements OnModuleInit {
         req.session.siwe = data;
         req.session.cookie.expires = new Date(Date.now() + 60 * 60 * 1000);
         req.session.save();
-        console.log('AUTHENTICATE SESSION', req.session);
         return true;
       } else {
         throw new Error();
@@ -48,13 +47,14 @@ export class AuthService implements OnModuleInit {
     }
   }
 
-  async checkAdminSubnames(request: CheckAdminSubnameRequest): Promise<boolean> {
+  async checkAdminSubnames(req: Request, request: CheckAdminSubnameRequest): Promise<boolean> {
     try {
 
       const domain = await this.justaName.subnames.getBySubname({ subname: request.domain, chainId: this.chainId as ChainId });
-      // const addressFound = domain.data.addresses.find(addr => addr.address === request.domainaddress);
+      const sessionAddress = req.session.siwe.address;
 
-      // if (!addressFound) return false;
+      const addressFound = domain.data.addresses.find(addr => addr.address === sessionAddress);
+      if(!addressFound) return false
 
       const adminRecordIndex = domain.data.textRecords.findIndex(record => record.key === 'admin');
       return adminRecordIndex >= 0;
